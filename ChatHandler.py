@@ -13,6 +13,7 @@ class ChatHandler:
         self.model_name = config["model_name"]
         self.prompt_list = config["prompt_list"]
         self.question_list = config["question_list"]
+        self.meta_prompt = config["meta_prompt"]
         self.current_prompt_index = 0
         self.nb_interactions = 0
 
@@ -57,8 +58,12 @@ class ChatHandler:
                 self.nb_interactions = 0
 
             # Generate AI response
+            promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
+            print(promptfull)
+            print(self.current_prompt_index)
+            print(len(history))
             response_obj = self.chain.invoke({
-                "prompt": self.prompt_list[self.current_prompt_index]["prompt"],
+                "prompt": promptfull,
                 "messages": history_langchain.messages
             })
             response = response_obj.content

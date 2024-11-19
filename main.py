@@ -10,7 +10,7 @@ DATA_DIR = '.'
 def main():
     # Load configuration
     config_manager = ConfigManager(CONFIG_DIR)
-    config = config_manager.get_config()
+    config = config_manager.load_config('config1.json')
 
     # Set up API key
     api_key = os.getenv('OPENAI_KEY')
@@ -24,7 +24,7 @@ def main():
     chat_handler = ChatHandler(config, api_key, logger)
 
     print(chat_handler.get_initial_chatbot_value())
-    print(chat_handler.response("Hello", [("", ""), ("",""), ("","")]))
+    print(chat_handler.response("Hello", [("", ""), ("",""), ("",""),("", ""), ("",""), ("",""), ("", ""), ("",""), ("","")]))
 
 if __name__ == "__main__":
     main()
