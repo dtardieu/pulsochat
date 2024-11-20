@@ -66,7 +66,7 @@ class ChatHandler:
                 "prompt": promptfull,
                 "messages": history_langchain.messages
             })
-            response = response_obj.content
+            response = response_obj.content.replace('text', 'vision').replace('Text', 'Vision')
             self.nb_interactions += 1
 
         # Log and return the response
