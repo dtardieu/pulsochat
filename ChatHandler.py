@@ -1,6 +1,5 @@
 from langchain_openai import ChatOpenAI
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, SystemMessagePromptTemplate
 
 
 class ChatHandler:
@@ -30,28 +29,23 @@ class ChatHandler:
 
     def get_initial_chatbot_value(self):
         """Returns the initial value for the chatbot (first question)."""
-        return [[None, self.question_list[0]]]
+        return self.question_list[0]
 
-    def response(self, message, history):
+    def response(self, message, history=[]):
         """Generates a response based on the message and conversation history."""
         # Reset counters for a new session
-        if len(history) == 1:
+
+        if len(history)+1 <= 2:
             self.nb_interactions = 0
             self.current_prompt_index = 0
 
         # Determine if we should use a predefined question or generate a response
-        if len(history) < len(self.question_list):
-            response = self.question_list[len(history)]
+        if len(history)+1 < 2*len(self.question_list):
+            print(f"history lenght: {len(history)}")
+            print(history)
+            print(f"question: {self.question_list[(len(history)+1)//2]}")
+            response = self.question_list[(len(history)+1)//2]
         else:
-            # Build conversation history
-            history_langchain = ChatMessageHistory()
-            for human, ai in history:
-                if human:
-                    history_langchain.add_user_message(human)
-                if ai:
-                    history_langchain.add_ai_message(ai)
-            history_langchain.add_user_message(message)
-
             # Update prompt index based on interactions
             if self.nb_interactions >= self.prompt_list[self.current_prompt_index]["interactions"]:
                 self.current_prompt_index = min(self.current_prompt_index + 1, len(self.prompt_list) - 1)
@@ -59,12 +53,12 @@ class ChatHandler:
 
             # Generate AI response
             promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
-            print(promptfull)
-            print(self.current_prompt_index)
-            print(len(history))
+
+            print(history+[{"role": "user", "content": message}])
+
             response_obj = self.chain.invoke({
                 "prompt": promptfull,
-                "messages": history_langchain.messages
+                "messages": history+[{"role": "user", "content": message}]
             })
             response = response_obj.content.replace('text', 'vision').replace('Text', 'Vision')
             self.nb_interactions += 1
