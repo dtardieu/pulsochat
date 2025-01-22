@@ -31,6 +31,13 @@ class ChatHandler:
         """Returns the initial value for the chatbot (first question)."""
         return self.question_list[0]
 
+    def get_current_state(self):
+        return self.current_state
+
+    def reset(self):
+        self.current_prompt_index = 0
+        self.nb_interactions = 0
+
     def response(self, message, history=[]):
         """Generates a response based on the message and conversation history."""
         # Reset counters for a new session
@@ -38,7 +45,9 @@ class ChatHandler:
         if len(history)+1 <= 2:
             self.nb_interactions = 0
             self.current_prompt_index = 0
+            self.current_state = 0
 
+        self.current_state += 1
         # Determine if we should use a predefined question or generate a response
         if len(history)+1 < 2*len(self.question_list):
             print(f"history lenght: {len(history)}")
