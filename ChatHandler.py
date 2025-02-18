@@ -1,5 +1,6 @@
 import openai
 from nltk.tokenize import sent_tokenize
+import json
 
 class ChatHandler:
     """Manages the chat interactions and responses."""
@@ -35,30 +36,25 @@ class ChatHandler:
             self.current_prompt_index = 0
             self.state = 0
 
-        print("1--------------------")
         if len(history) + 1 < 2 * len(self.question_list):
             self.state += 1
             response = self.question_list[(len(history) + 1) // 2]
             self.logger.log_interaction(message, response)
-            print("2--------------------")
             yield response
         else:
-            print("3--------------------")
             if self.nb_interactions >= self.prompt_list[self.current_prompt_index]["interactions"]:
-                print("4--------------------")
                 self.current_prompt_index = min(self.current_prompt_index + 1, len(self.prompt_list) - 1)
                 self.nb_interactions = 0
 
             self.state += 1
             promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
-            messages = history + [{"role": "user", "content": message}]
+            messages = [{"role": "system", "content": promptfull}] + history + [{"role": "user", "content": message}]
 
-
-            print(messages)
+            print("chat_handler")
+            print(json.dumps(messages, indent=4))
             response_obj = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
-                temperature=0.7,
                 stream=stream
             )
 
@@ -72,7 +68,6 @@ class ChatHandler:
                     if len(sentences) > 1:
                         yield sentences[0]
                         printable_text = new_text
-                self.logger.log_interaction(message, generated_text)
                 yield printable_text  # Return last part
             else:
                 response = response_obj.choices[0].message.content
