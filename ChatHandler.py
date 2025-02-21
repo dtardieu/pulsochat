@@ -28,6 +28,9 @@ class ChatHandler:
     def reset(self):
         self.current_prompt_index = 0
         self.nb_interactions = 0
+        #self.state=0
+        #TODO reset history ????
+        #TODO shut up !
 
     def response(self, message, history=[], stream=False):
         """Generates a response based on the message and conversation history."""
@@ -50,14 +53,16 @@ class ChatHandler:
             promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
             messages = [{"role": "system", "content": promptfull}] + history + [{"role": "user", "content": message}]
 
-            print("chat_handler")
-            print(json.dumps(messages, indent=4))
+            #print("chat_handler")
+            #print(json.dumps(messages, indent=4))
+
+            #stream = False
             response_obj = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
                 stream=stream
             )
-
+            
             if stream:
                 generated_text, printable_text = "", ""
                 for chunk in response_obj:
@@ -73,5 +78,6 @@ class ChatHandler:
                 response = response_obj.choices[0].message.content
                 self.logger.log_interaction(message, response)
                 return response
-
+            
+            #TODO log quand on stream ???
             self.nb_interactions += 1
