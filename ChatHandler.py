@@ -32,7 +32,7 @@ class ChatHandler:
         #TODO reset history ????
         #TODO shut up !
 
-    def response(self, message, history=[], stream=False):
+    def response(self, message, history=[], stream=False, temperature=1, top_p=1):
         """Generates a response based on the message and conversation history."""
         if len(history) + 1 <= 2:
             self.nb_interactions = 0
@@ -50,8 +50,8 @@ class ChatHandler:
                 self.nb_interactions = 0
 
             self.state += 1
-            promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
-            messages = [{"role": "system", "content": promptfull}] + history + [{"role": "user", "content": message}]
+            #promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
+            messages = [{"role": "system", "content": self.meta_prompt}] + history + [{"role": "user", "content": message}] + [{"role": "system", "content": self.prompt_list[self.current_prompt_index]["prompt"]}] 
 
             #print("chat_handler")
             #print(json.dumps(messages, indent=4))
@@ -60,7 +60,9 @@ class ChatHandler:
             response_obj = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
-                stream=stream
+                stream=stream,
+                top_p=top_p,
+                temperature=temperature
             )
 
             if stream:
