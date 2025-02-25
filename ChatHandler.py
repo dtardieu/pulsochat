@@ -51,10 +51,10 @@ class ChatHandler:
 
             self.state += 1
             #promptfull = self.meta_prompt + self.prompt_list[self.current_prompt_index]["prompt"]
-            messages = [{"role": "system", "content": self.meta_prompt}] + history + [{"role": "user", "content": message}] + [{"role": "system", "content": self.prompt_list[self.current_prompt_index]["prompt"]}] 
+            messages = [{"role": "system", "content": self.meta_prompt}] + history + [{"role": "user", "content": message}] + [{"role": "system", "content": self.prompt_list[self.current_prompt_index]["prompt"]}]
 
             #print("chat_handler")
-            #print(json.dumps(messages, indent=4))
+            print(json.dumps(messages, indent=4))
 
             #stream = False
             response_obj = self.client.chat.completions.create(
@@ -64,7 +64,7 @@ class ChatHandler:
                 top_p=top_p,
                 temperature=temperature
             )
-            
+
             if stream:
                 generated_text, printable_text = "", ""
                 for chunk in response_obj:
@@ -80,6 +80,6 @@ class ChatHandler:
                 response = response_obj.choices[0].message.content
                 self.logger.log_interaction(message, response)
                 return response
-            
+
             #TODO log quand on stream ???
             self.nb_interactions += 1
