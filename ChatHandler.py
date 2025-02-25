@@ -66,20 +66,20 @@ class ChatHandler:
             )
 
             if stream:
-                generated_text, printable_text = "", ""
+                full_response, printable_text = "", ""
                 for chunk in response_obj:
                     new_text = chunk.choices[0].delta.content or ""
-                    generated_text += new_text
+                    full_response += new_text
                     printable_text += new_text
                     sentences = sent_tokenize(printable_text)
                     if len(sentences) > 1:
                         yield sentences[0]
                         printable_text = new_text
                 yield printable_text  # Return last part
+                self.logger.log_interaction(message, full_response)
             else:
                 response = response_obj.choices[0].message.content
                 self.logger.log_interaction(message, response)
                 return response
 
-            #TODO log quand on stream ???
             self.nb_interactions += 1
