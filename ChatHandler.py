@@ -25,8 +25,6 @@ class ChatHandler:
         self.client = openai.OpenAI()
         self.nb_interactions=0
 
-    def reset(self):
-        pass
 
     def set_phase(self, phase_name):
         """
@@ -36,9 +34,13 @@ class ChatHandler:
         """
         for phase in self.scenario:
             if phase.get("name") == phase_name:
+                if self.current_phase:
+                    if self.current_phase["name"]!=phase["name"]:
+                        self.nb_interactions=0
                 self.current_phase = phase
                 self.question_asked = False
                 self.logger.log_interaction("SYSTEM", f"Phase set to: {phase_name}")
+                print(f"changed phase to: {phase_name}")
                 return
         self.logger.log_interaction("SYSTEM", f"Phase not found: {phase_name}")
         self.current_phase = None
@@ -69,7 +71,7 @@ class ChatHandler:
             sentences = sent_tokenize(buffer_text)
             if len(sentences) > 1:
                 for sentence in sentences[:-1]:
-                    yield sentence
+                    yield sentence.replace("?", " ? ")
                 buffer_text = sentences[-1]
         if buffer_text:
             yield buffer_text
@@ -79,7 +81,7 @@ class ChatHandler:
         return self.nb_interactions
 
     def reset(self):
-        self.current_state=0
+        self.nb_interactions=0
 
     def response(self, message, history=None, temperature=1.0, top_p=1.0):
         """
