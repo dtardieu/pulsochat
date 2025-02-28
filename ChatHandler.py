@@ -34,9 +34,9 @@ class ChatHandler:
         """
         for phase in self.scenario:
             if phase.get("name") == phase_name:
-                if self.current_phase:
-                    if self.current_phase["name"]!=phase["name"]:
-                        self.nb_interactions=0
+                #if self.current_phase:
+                #    if self.current_phase["name"]!=phase["name"]:
+                self.nb_interactions=0
                 self.current_phase = phase
                 self.question_asked = False
                 self.logger.log_interaction("SYSTEM", f"Phase set to: {phase_name}")
@@ -54,8 +54,8 @@ class ChatHandler:
         messages = [{"role": "system", "content": self.meta_prompt}]
         messages.extend(history)
         messages.append({"role": "user", "content": message})
-        if prompt:
-            messages.append({"role": "system", "content": prompt})
+        #if prompt:
+        #    messages.append({"role": "system", "content": prompt})
         return messages
 
     def _handle_streaming_response(self, response_obj, message):
@@ -81,6 +81,7 @@ class ChatHandler:
         return self.nb_interactions
 
     def reset(self):
+        print(f"ChatHandler - Reset")
         self.nb_interactions=0
 
     def response(self, message, history=None, temperature=1.0, top_p=1.0):
@@ -116,16 +117,16 @@ class ChatHandler:
 
         prompt = self.current_phase.get("prompt", "")
 
-        if prompt:
-            messages = self._build_messages(message, history, prompt)
-            print(json.dumps(messages, indent=4))
-            response_obj = self.client.chat.completions.create(
-                model=self.model_name,
-                messages=messages,
-                stream=True,
-                top_p=top_p,
-                temperature=temperature
-            )
-            self.nb_interactions+=1
-            for part in self._handle_streaming_response(response_obj, message):
-                yield part
+        #if prompt:
+        messages = self._build_messages(message, history, prompt)
+        #print(json.dumps(messages, indent=4))
+        response_obj = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            stream=True,
+            top_p=top_p,
+            temperature=temperature
+        )
+        self.nb_interactions+=1
+        for part in self._handle_streaming_response(response_obj, message):
+            yield part
